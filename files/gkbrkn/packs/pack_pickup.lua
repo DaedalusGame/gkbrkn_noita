@@ -12,6 +12,7 @@ function item_pickup( entity_item, entity_who_picked, item_name )
     if pack_data then
         local chosen_cards = crack_pack( pack_data, x, y );
         for _,action_id in pairs( chosen_cards ) do
+			--GamePrint("[goki's things] Obtained "..action_id.." from pack");
             local action = CreateItemActionEntity( action_id, x, y );
             local velocity = EntityGetFirstComponent( action, "VelocityComponent" );
             if velocity ~= nil then ComponentSetValue2( velocity, "mVelocity", Random( -100, 100 ), Random( -25, 25 ) - 100 ); end

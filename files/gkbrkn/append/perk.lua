@@ -20,8 +20,8 @@ function perk_get_spawn_order()
 end
 
 local _perk_spawn = perk_spawn;
-function perk_spawn( x, y, perk_id )
-    local perk = _perk_spawn( x, y, perk_id );
+function perk_spawn( x, y, perk_id, dont_remove_other_perks_ )
+    local perk = _perk_spawn( x, y, perk_id, dont_remove_other_perks_ );
     if setting_get( MISC.ShowPerkDescriptions.EnabledFlag ) then
         if perk then
             local perk_data = get_perk_with_id( perk_list, perk_id );
@@ -38,11 +38,15 @@ function perk_spawn( x, y, perk_id )
 end
 
 local _perk_pickup = perk_pickup;
-function perk_pickup( entity_item, entity_who_picked, item_name, do_cosmetic_fx, kill_other_perks )
+function perk_pickup( entity_item, entity_who_picked, item_name, do_cosmetic_fx, kill_other_perks, no_perk_entity_ )
     local perk_id = ""
-	edit_component( entity_item, "VariableStorageComponent", function(comp,vars)
-		perk_id = ComponentGetValue2( comp, "value_string" )
-	end)
+	if no_perk_entity then
+		perk_id = item_name
+	else
+		edit_component( entity_item, "VariableStorageComponent", function(comp,vars)
+			perk_id = ComponentGetValue( comp, "value_string" )
+		end)
+	end
 
 	local perk_data = get_perk_with_id( perk_list, perk_id )
     local can_recurse = false;
@@ -53,11 +57,11 @@ function perk_pickup( entity_item, entity_who_picked, item_name, do_cosmetic_fx,
     local recursion_stacks = EntityGetVariableNumber( entity_who_picked, "gkbrkn_recursion_stacks", 0 );
     if can_recurse and recursion_stacks > 0 then
         for i=1,recursion_stacks,1 do
-            _perk_pickup( entity_item, entity_who_picked, item_name, do_cosmetic_fx, kill_other_perks );
+            _perk_pickup( entity_item, entity_who_picked, item_name, do_cosmetic_fx, kill_other_perks, no_perk_entity_ );
             EntitySetVariableNumber( entity_who_picked, "gkbrkn_recursion_stacks", EntityGetVariableNumber( entity_who_picked, "gkbrkn_recursion_stacks", 0 ) - 1 );
         end
     else
-        _perk_pickup( entity_item, entity_who_picked, item_name, do_cosmetic_fx, kill_other_perks );
+        _perk_pickup( entity_item, entity_who_picked, item_name, do_cosmetic_fx, kill_other_perks, no_perk_entity_ );
     end
 end
 
@@ -187,7 +191,7 @@ function perk_get_at_index( index, min_distance_between_duplicate_perks, duplica
 end
 
 local _perk_spawn_random = perk_spawn_random;
-function perk_spawn_random( x, y )
+function perk_spawn_random( x, y, dont_remove_others_ )
     if setting_get( MISC.PerkRewrite.NewLogicFlag ) then
         local result_id = 0;
         
@@ -196,16 +200,16 @@ function perk_spawn_random( x, y )
         GlobalsSetValue( "TEMPLE_NEXT_PERK_INDEX", tostring( next_perk_index + 1 ) );
 
         GameAddFlagRun( get_perk_flag_name( perk_id ) );
-        result_id = perk_spawn( x, y, perk_id );
+        result_id = perk_spawn( x, y, perk_id, dont_remove_others_ );
         
         return result_id;
     else
-        return _perk_spawn_random( x, y );
+        return _perk_spawn_random( x, y, dont_remove_others_ );
     end
 end
 
 local _perk_spawn_many = perk_spawn_many;
-function perk_spawn_many( x, y )
+function perk_spawn_many( x, y, dont_remove_others_, ignore_these_ )
     if setting_get( MISC.PerkRewrite.NewLogicFlag ) then
         local perk_count = tonumber( GlobalsGetValue( "TEMPLE_PERK_COUNT", "3" ) )
         
@@ -214,10 +218,10 @@ function perk_spawn_many( x, y )
         local item_width = width / count
 
         for i=1,count do
-            perk_spawn_random( x + (i-0.5)*item_width, y )
+            perk_spawn_random( x + (i-0.5)*item_width, y, dont_remove_others_ )
         end
     else
-       _perk_spawn_many( x, y );
+       _perk_spawn_many( x, y, dont_remove_others_, ignore_these_ );
     end
 end
 

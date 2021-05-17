@@ -1,4 +1,5 @@
 dofile( "data/scripts/items/generate_shop_item.lua" );
+dofile( "mods/gkbrkn_noita/files/gkbrkn/content/packs.lua" );
 function item_pickup( entity_item, entity_who_picked, item_name )
 	local x, y = EntityGetTransform( entity_item );
 
@@ -34,12 +35,16 @@ function item_pickup( entity_item, entity_who_picked, item_name )
     GetRandomAction = function( x, y, max_level, type, i )
         return _GetRandomAction( x + pull * 13, y + pull * 127, max_level, type, i );
     end
+	local pack_weight_table = get_pack_weight_table();
     for i=1,#shop_items do
         local item = shop_items[i];
         local wand = EntityHasTag( item, "wand" );
+		local pack = EntityHasTag( item, "gkbrkn_pack" );
         local x, y = EntityGetTransform( item );
         EntityKill( item );
-        if wand then
+		if pack then
+			generate_shop_pack( pack_weight_table, x, y, i == sale_item_i, nil, true);
+        elseif wand then
             generate_shop_wand( x, y, i == sale_item_i, nil, true );
         else
             generate_shop_item( x, y, i == sale_item_i, nil, true );

@@ -1,6 +1,5 @@
 <Entity tags="teleportable_NOT,gkbrkn_pack">
 
-    <ItemCostComponent cost="100" />
 	<UIInfoComponent name="$item_gkbrkn_pack"></UIInfoComponent>
 
 	<ItemComponent

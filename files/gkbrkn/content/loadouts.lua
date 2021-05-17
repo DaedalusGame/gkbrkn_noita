@@ -275,7 +275,7 @@ loadouts = {
                 permanent_actions = {
                 },
                 actions = {
-                    {"PIPE_BOMB_DETONATOR"}
+                    {"BOMB_DETONATOR"}
                 }
             }
         },
